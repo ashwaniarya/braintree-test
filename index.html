@@ -12,5 +12,43 @@
   <!-- includes the Braintree JS client SDK -->
   <script src="https://js.braintreegateway.com/web/3.70.0/js/client.min.js"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=AQ0SKFzlTj_lTBcp9mPbrxMPeDyWiKlI3qAZkAjVQ8t3pwEkRF45m3ohLYitiDMszWQBk64QBMC-c3Yj"></script>
+  <script>
+    braintree.client.create({
+  authorization: 'authorization'
+}).then(function (clientInstance) {
+  return braintree.paypalCheckout.create({
+    client: clientInstance
+  });
+}).then(function (paypalCheckoutInstance) {
+  return paypal.Buttons({
+    createOrder: function () {
+      return paypalCheckoutInstance.createPayment({
+        flow: 'checkout',
+        currency: 'USD',
+        amount: '10.00',
+        intent: 'capture' // this value must either be `capture` or match the intent passed into the PayPal SDK intent query parameter
+        // your other createPayment options here
+      });
+    },
+
+    onApprove: function (data, actions) {
+      // some logic here before tokenization happens below
+      return paypalCheckoutInstance.tokenizePayment(data).then(function (payload) {
+        // Submit payload.nonce to your server
+      });
+    },
+
+    onCancel: function () {
+      // handle case where user cancels
+    },
+
+    onError: function (err) {
+      // handle case where error occurs
+    }
+  }).render('#paypal-button');
+}).catch(function (err) {
+ console.error('Error!', err);
+});
+  </script>
 
 </body>
